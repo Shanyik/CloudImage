@@ -1,0 +1,6 @@
+@CloudImage_HostAddress = http://localhost:5246
+
+GET {{CloudImage_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
