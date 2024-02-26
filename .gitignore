@@ -510,5 +510,6 @@ appsettings.json
 appsettings.Development.json
 Migrations/
 data/
+Images/
 
 # End of https://www.toptal.com/developers/gitignore/api/rider,visualstudiocode,react,csharp
