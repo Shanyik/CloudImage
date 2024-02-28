@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Net;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CloudImage.ImagesController
 {
@@ -45,6 +46,11 @@ namespace CloudImage.ImagesController
 
                     // Get the path where the image will be stored
                     var filePath = Path.Combine(imagesDirectory, uniqueFileName);
+                    
+                    await using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
 
                     // Save the image 
                     await using (var stream = new FileStream(filePath, FileMode.Create))
