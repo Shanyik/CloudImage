@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  CloudImage:
+    image: cloudimage
+    build: 
+      context: ./CloudImage/CloudImage
+    container_name: CloudImage
+    ports:
+      - "5246:5246"
+
+    
