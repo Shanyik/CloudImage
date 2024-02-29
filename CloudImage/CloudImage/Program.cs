@@ -31,4 +31,14 @@ app.UseStaticFiles(new StaticFileOptions
 
 app.MapControllers();
 
+app.UseCors(corsPolicyBuilder =>
+{
+    corsPolicyBuilder
+        .WithOrigins("http://localhost:5201")
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials();
+
+});
+
 app.Run();
