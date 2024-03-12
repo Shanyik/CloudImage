@@ -11,6 +11,7 @@ namespace CloudImage.ImagesController
         // Get the base URL dynamically from the incoming request
         private readonly IApiKeyService _apiKeyService;
         private readonly string _baseUrl;
+        private readonly string _imagesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Images");
 
         public ImageController(IApiKeyService apiKeyService, IHttpContextAccessor httpContextAccessor)
         {
@@ -56,10 +57,10 @@ namespace CloudImage.ImagesController
             try
             {
                 // Ensure that the Images directory exists, create it if it doesn't
-                var imagesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Images");
-                if (!Directory.Exists(imagesDirectory))
+                
+                if (!Directory.Exists(_imagesDirectory))
                 {
-                    Directory.CreateDirectory(imagesDirectory);
+                    Directory.CreateDirectory(_imagesDirectory);
                 }
 
                 var imageUrls = new List<string>();
@@ -70,7 +71,7 @@ namespace CloudImage.ImagesController
                     var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
 
                     // Get the path where the image will be stored
-                    var filePath = Path.Combine(imagesDirectory, uniqueFileName);
+                    var filePath = Path.Combine(_imagesDirectory, uniqueFileName);
                     
                     // Save the image 
                     await using (var stream = new FileStream(filePath, FileMode.Create))
@@ -90,6 +91,35 @@ namespace CloudImage.ImagesController
             {
                 return StatusCode(500, $"Error uploading image: {ex.Message}");
             }
+        }
+
+        [HttpPost("delete")]
+        public async Task<IActionResult> Delete(IList<string> urlList)
+        {
+            try
+            {
+                foreach (var url in urlList)
+                {
+                    var fileName = GetFileNameFromUrl(url);
+                    var filePath = Path.Combine(_imagesDirectory, fileName);
+                
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+                }
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+        private string GetFileNameFromUrl(string url)
+        {
+            return url.Split('/').Last(); // Extract the filename from the URL
         }
     }
 }
