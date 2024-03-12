@@ -1,15 +1,24 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CloudImage.Service;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CloudImage.ImagesController
 {
     
     [ApiController]
     [Route("[controller]")]
-    public class ImageController(IHttpContextAccessor httpContextAccessor) : ControllerBase
+    public class ImageController : ControllerBase
     {
         // Get the base URL dynamically from the incoming request
-        private readonly string _baseUrl = $"{httpContextAccessor.HttpContext?.Request.Scheme}://{httpContextAccessor.HttpContext!.Request.Host}/images/";
-        
+        private readonly IApiKeyService _apiKeyService;
+        private readonly string _baseUrl;
+
+        public ImageController(IApiKeyService apiKeyService, IHttpContextAccessor httpContextAccessor)
+        {
+            _apiKeyService = apiKeyService;
+            _baseUrl = $"{httpContextAccessor.HttpContext?.Request.Scheme}://{httpContextAccessor.HttpContext!.Request.Host}/images/";
+        }
+
+
         [HttpGet("StatusCheck")]
         public Task<IActionResult> StatusCheck()
         {
@@ -17,8 +26,21 @@ namespace CloudImage.ImagesController
         }
 
         [HttpPost("upload")]
-        public async Task<IActionResult> Upload()
+        public async Task<IActionResult> Upload([FromHeader(Name = "ApiKey")] string apiKey)
         {
+            
+            // Check if the API key is provided
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                return BadRequest("API key is missing.");
+            }
+
+            // Check if the provided API key is valid
+            if (!_apiKeyService.IsValidApiKey(apiKey))
+            {
+                return Unauthorized("Invalid API key.");
+            }
+            
             if (!Request.HasFormContentType)
             {
                 return BadRequest("Invalid request. Expected multipart form data.");

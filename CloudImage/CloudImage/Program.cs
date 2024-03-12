@@ -1,4 +1,10 @@
+using CloudImage.Service;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +14,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
+
+// Register your IApiKeyService implementation
+builder.Services.AddSingleton<IApiKeyService, ApiKeyService>();
 
 var app = builder.Build();
 
@@ -30,8 +39,7 @@ if (!Directory.Exists(imagesDirectory))
 
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(
-        imagesDirectory),
+    FileProvider = new PhysicalFileProvider(imagesDirectory),
     RequestPath = "/images"
 });
 
