@@ -23,4 +23,16 @@ public class ApiKeyService : IApiKeyService
     {
         return _apiKeys.Any(k => k.Key == apiKey);
     }
+    
+    public void AddApiKey(string apiKey)
+    {
+        _apiKeys.Add(new ApiKey { Key = apiKey });
+        SaveApiKeysToFile();
+    }
+
+    private void SaveApiKeysToFile()
+    {
+        var json = JsonConvert.SerializeObject(_apiKeys);
+        File.WriteAllText("ApiKeys.json", json);
+    }
 }

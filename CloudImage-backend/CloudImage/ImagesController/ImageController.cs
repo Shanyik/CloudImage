@@ -50,7 +50,7 @@ namespace CloudImage.ImagesController
                 }
             }
 
-            return Ok($"  Available space: {availableSpaceGb:N2} GB / {totalSpaceGb:N2} GB");
+            return Ok($"Available space: {availableSpaceGb:N2} GB / {totalSpaceGb:N2} GB");
         }
 
         [HttpPost("upload")]
@@ -144,8 +144,21 @@ namespace CloudImage.ImagesController
             }
         }
         
-        
+        [HttpPost("GenerateKey")]
+        public IActionResult GenerateApiKey()
+        {
+            string newApiKey = GenerateRandomApiKey();
+            
+            _apiKeyService.AddApiKey(newApiKey);
 
+            return Ok(new { ApiKey = newApiKey });
+        }
+
+        private string GenerateRandomApiKey()
+        {
+            return Guid.NewGuid().ToString("N");
+        }
+        
         private string GetFileNameFromUrl(string url)
         {
             return url.Split('/').Last(); // Extract the filename from the URL
