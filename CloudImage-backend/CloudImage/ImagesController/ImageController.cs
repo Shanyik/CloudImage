@@ -68,7 +68,7 @@ namespace CloudImage.ImagesController
                 foreach (var file in files)
                 {
                     // Generate a unique filename for the image
-                    var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                    var uniqueFileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
 
                     // Get the path where the image will be stored
                     var filePath = Path.Combine(_imagesDirectory, uniqueFileName);
