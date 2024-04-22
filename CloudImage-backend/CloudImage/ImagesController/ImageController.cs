@@ -1,4 +1,5 @@
 ﻿using CloudImage.Service;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CloudImage.ImagesController
@@ -24,6 +25,32 @@ namespace CloudImage.ImagesController
         public Task<IActionResult> StatusCheck()
         {
             return Task.FromResult<IActionResult>(Ok("Connection is good."));
+        }
+        
+        [HttpGet("CheckStorage")]
+        
+        public IActionResult CheckStorage()
+        {
+            DriveInfo[] allDrives = DriveInfo.GetDrives();
+
+            double availableSpaceGb = 0;
+            double totalSpaceGb = 0;
+                
+            foreach (DriveInfo drive in allDrives)
+            {
+                if (drive.IsReady)
+                {
+                    availableSpaceGb = (double)drive.AvailableFreeSpace / (1024 * 1024 * 1024);
+                    totalSpaceGb = (double)drive.TotalSize / (1024 * 1024 * 1024);
+                    
+                }
+                else
+                {
+                    return Ok("No driver.");
+                }
+            }
+
+            return Ok($"  Available space: {availableSpaceGb:N2} GB / {totalSpaceGb:N2} GB");
         }
 
         [HttpPost("upload")]
@@ -116,6 +143,8 @@ namespace CloudImage.ImagesController
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
+        
+        
 
         private string GetFileNameFromUrl(string url)
         {
