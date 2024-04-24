@@ -1,5 +1,4 @@
 ﻿using CloudImage.Service;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CloudImage.ImagesController
@@ -164,9 +163,23 @@ namespace CloudImage.ImagesController
             }
         }
         
+        [HttpGet("remainingSlots")]
+        public IActionResult GetRemainingSlots()
+        {
+            int remainingSlots = _apiKeyService.GetRemainingSlots();
+            return Ok(remainingSlots);
+        }
+        
         [HttpPost("GenerateKey")]
+        
         public IActionResult GenerateApiKey()
         {
+
+            if (_apiKeyService.GetRemainingSlots() == 0)
+            {
+                return BadRequest("No available slots.");
+            }
+            
             string newApiKey = GenerateRandomApiKey();
             
             _apiKeyService.AddApiKey(newApiKey);

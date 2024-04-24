@@ -6,4 +6,5 @@ public interface IApiKeyService
     void AddApiKey(string apiKey);
     double GetRemainingStorage(string apiKey);
     void UpdateUsedStorage(string apiKey, double uploadedFileSize);
+    int GetRemainingSlots();
 }

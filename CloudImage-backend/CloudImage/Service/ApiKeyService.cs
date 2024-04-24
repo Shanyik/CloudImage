@@ -58,6 +58,14 @@ public class ApiKeyService : IApiKeyService
             SaveApiKeysToFile();
         }
     }
+    
+    public int GetRemainingSlots()
+    {
+        int totalKeys = _apiKeys.Count;
+        int maxSlots = 10; 
+
+        return maxSlots - totalKeys;
+    }
 
     private void SaveApiKeysToFile()
     {
