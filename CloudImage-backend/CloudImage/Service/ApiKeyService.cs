@@ -49,7 +49,7 @@ public class ApiKeyService : IApiKeyService
         return 0;
     }
     
-    public void UpdateUsedStorage(string apiKey, long uploadedFileSize)
+    public void UpdateUsedStorage(string apiKey, double uploadedFileSize)
     {
         var apiKeyInfo = _apiKeys.FirstOrDefault(k => k.Key == apiKey);
         if (apiKeyInfo != null)

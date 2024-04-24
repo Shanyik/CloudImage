@@ -122,20 +122,39 @@ namespace CloudImage.ImagesController
         }
 
         [HttpPost("delete")]
-        public async Task<IActionResult> Delete(IList<string> urlList)
+        public async Task<IActionResult> Delete([FromHeader(Name = "ApiKey")] string apiKey, IList<string> urlList)
         {
             try
             {
+                // Check if the API key is provided
+                if (string.IsNullOrEmpty(apiKey))
+                {
+                    return BadRequest("API key is missing.");
+                }
+
+                // Check if the provided API key is valid
+                if (!_apiKeyService.IsValidApiKey(apiKey))
+                {
+                    return Unauthorized("Invalid API key.");
+                }
+
+                double totalDeletedSize = 0;
+
                 foreach (var url in urlList)
                 {
                     var fileName = GetFileNameFromUrl(url);
                     var filePath = Path.Combine(_imagesDirectory, fileName);
-                
+
                     if (System.IO.File.Exists(filePath))
                     {
+                        var fileInfo = new FileInfo(filePath);
+                        totalDeletedSize += fileInfo.Length;
                         System.IO.File.Delete(filePath);
                     }
                 }
+
+                // Update used storage for the user
+                _apiKeyService.UpdateUsedStorage(apiKey, - totalDeletedSize);
 
                 return Ok();
             }
