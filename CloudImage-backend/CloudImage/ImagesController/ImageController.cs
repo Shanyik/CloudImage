@@ -9,7 +9,6 @@ namespace CloudImage.ImagesController
     [Route("[controller]")]
     public class ImageController : ControllerBase
     {
-        // Get the base URL dynamically from the incoming request
         private readonly IApiKeyService _apiKeyService;
         private readonly string _baseUrl;
         private readonly string _imagesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Images");
@@ -56,14 +55,12 @@ namespace CloudImage.ImagesController
         [HttpPost("upload")]
         public async Task<IActionResult> Upload([FromHeader(Name = "ApiKey")] string apiKey)
         {
-            
-            // Check if the API key is provided
+
             if (string.IsNullOrEmpty(apiKey))
             {
                 return BadRequest("API key is missing.");
             }
-
-            // Check if the provided API key is valid
+            
             if (!_apiKeyService.IsValidApiKey(apiKey))
             {
                 return Unauthorized("Invalid API key.");
@@ -83,35 +80,39 @@ namespace CloudImage.ImagesController
             
             try
             {
-                // Ensure that the Images directory exists, create it if it doesn't
-                
                 if (!Directory.Exists(_imagesDirectory))
                 {
                     Directory.CreateDirectory(_imagesDirectory);
                 }
 
                 var imageUrls = new List<string>();
+                
+                long totalUploadedSize = files.Sum(file => file.Length);
+                
+                double remainingStorage = _apiKeyService.GetRemainingStorage(apiKey);
+                if (totalUploadedSize > remainingStorage * 1024 * 1024) // Convert GB to bytes
+                {
+                    return BadRequest("Upload exceeds remaining storage limit.");
+                }
 
                 foreach (var file in files)
                 {
-                    // Generate a unique filename for the image
                     var uniqueFileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
-
-                    // Get the path where the image will be stored
+                    
                     var filePath = Path.Combine(_imagesDirectory, uniqueFileName);
                     
-                    // Save the image 
                     await using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await file.CopyToAsync(stream);
+                        
                     }
+                    
+                    _apiKeyService.UpdateUsedStorage(apiKey, file.Length);
 
-                    // Construct the URL for the uploaded image and add it to the response
                     var imageUrl = _baseUrl + uniqueFileName;
                     imageUrls.Add(imageUrl);
                 }
-
-                // Return URLs to store in a database
+                
                 return Ok(imageUrls);
             }
             catch (Exception ex)
@@ -161,7 +162,7 @@ namespace CloudImage.ImagesController
         
         private string GetFileNameFromUrl(string url)
         {
-            return url.Split('/').Last(); // Extract the filename from the URL
+            return url.Split('/').Last(); 
         }
     }
 }
