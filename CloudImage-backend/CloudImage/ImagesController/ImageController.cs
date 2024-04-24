@@ -10,64 +10,47 @@ namespace CloudImage.ImagesController
     {
         private readonly IApiKeyService _apiKeyService;
         private readonly string _baseUrl;
-        private readonly string _imagesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Images");
+        private readonly string _imagesDirectory;
 
         public ImageController(IApiKeyService apiKeyService, IHttpContextAccessor httpContextAccessor)
         {
             _apiKeyService = apiKeyService;
             _baseUrl = $"{httpContextAccessor.HttpContext?.Request.Scheme}://{httpContextAccessor.HttpContext!.Request.Host}/images/";
+            _imagesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Images");
         }
 
 
         [HttpGet("StatusCheck")]
-        public Task<IActionResult> StatusCheck()
+        public IActionResult StatusCheck()
         {
-            return Task.FromResult<IActionResult>(Ok("Connection is good."));
+            return Ok("Connection is good.");
         }
         
         [HttpGet("CheckStorage")]
         
         public IActionResult CheckStorage()
         {
-            DriveInfo[] allDrives = DriveInfo.GetDrives();
-
-            double availableSpaceGb = 0;
-            double totalSpaceGb = 0;
-                
-            foreach (DriveInfo drive in allDrives)
+            var allDrives = DriveInfo.GetDrives();
+            foreach (var drive in allDrives)
             {
                 if (drive.IsReady)
                 {
-                    availableSpaceGb = (double)drive.AvailableFreeSpace / (1024 * 1024 * 1024);
-                    totalSpaceGb = (double)drive.TotalSize / (1024 * 1024 * 1024);
-                    
-                }
-                else
-                {
-                    return Ok("No driver.");
+                    var availableSpaceGb = (double)drive.AvailableFreeSpace / (1024 * 1024 * 1024);
+                    var totalSpaceGb = (double)drive.TotalSize / (1024 * 1024 * 1024);
+                    return Ok($"Available space: {availableSpaceGb:N2} GB / {totalSpaceGb:N2} GB");
                 }
             }
-
-            return Ok($"Available space: {availableSpaceGb:N2} GB / {totalSpaceGb:N2} GB");
+            return Ok("No driver.");
         }
 
         [HttpPost("upload")]
         public async Task<IActionResult> Upload([FromHeader(Name = "ApiKey")] string apiKey)
         {
 
-            if (string.IsNullOrEmpty(apiKey))
+            IActionResult validationResult = ValidateApiKeyAndRequest(apiKey);
+            if (ValidateApiKeyAndRequest(apiKey) != null)
             {
-                return BadRequest("API key is missing.");
-            }
-            
-            if (!_apiKeyService.IsValidApiKey(apiKey))
-            {
-                return Unauthorized("Invalid API key.");
-            }
-            
-            if (!Request.HasFormContentType)
-            {
-                return BadRequest("Invalid request. Expected multipart form data.");
+                return validationResult;
             }
             
             var files = Request.Form.Files;
@@ -85,10 +68,8 @@ namespace CloudImage.ImagesController
                 }
 
                 var imageUrls = new List<string>();
-                
-                long totalUploadedSize = files.Sum(file => file.Length);
-                
-                double remainingStorage = _apiKeyService.GetRemainingStorage(apiKey);
+                var totalUploadedSize = files.Sum(file => file.Length);
+                var remainingStorage = _apiKeyService.GetRemainingStorage(apiKey);
                 if (totalUploadedSize > remainingStorage * 1024 * 1024) // Convert GB to bytes
                 {
                     return BadRequest("Upload exceeds remaining storage limit.");
@@ -97,17 +78,12 @@ namespace CloudImage.ImagesController
                 foreach (var file in files)
                 {
                     var uniqueFileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
-                    
                     var filePath = Path.Combine(_imagesDirectory, uniqueFileName);
-                    
                     await using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await file.CopyToAsync(stream);
-                        
                     }
-                    
                     _apiKeyService.UpdateUsedStorage(apiKey, file.Length);
-
                     var imageUrl = _baseUrl + uniqueFileName;
                     imageUrls.Add(imageUrl);
                 }
@@ -121,29 +97,22 @@ namespace CloudImage.ImagesController
         }
 
         [HttpPost("delete")]
-        public async Task<IActionResult> Delete([FromHeader(Name = "ApiKey")] string apiKey, IList<string> urlList)
+        public IActionResult Delete([FromHeader(Name = "ApiKey")] string apiKey, IList<string> urlList)
         {
+            
+            IActionResult validationResult = ValidateApiKeyAndRequest(apiKey);
+            if (ValidateApiKeyAndRequest(apiKey) != null)
+            {
+                return validationResult;
+            }
+            
             try
             {
-                // Check if the API key is provided
-                if (string.IsNullOrEmpty(apiKey))
-                {
-                    return BadRequest("API key is missing.");
-                }
-
-                // Check if the provided API key is valid
-                if (!_apiKeyService.IsValidApiKey(apiKey))
-                {
-                    return Unauthorized("Invalid API key.");
-                }
-
                 double totalDeletedSize = 0;
-
                 foreach (var url in urlList)
                 {
                     var fileName = GetFileNameFromUrl(url);
                     var filePath = Path.Combine(_imagesDirectory, fileName);
-
                     if (System.IO.File.Exists(filePath))
                     {
                         var fileInfo = new FileInfo(filePath);
@@ -151,10 +120,7 @@ namespace CloudImage.ImagesController
                         System.IO.File.Delete(filePath);
                     }
                 }
-
-                // Update used storage for the user
                 _apiKeyService.UpdateUsedStorage(apiKey, - totalDeletedSize);
-
                 return Ok();
             }
             catch (Exception ex)
@@ -171,20 +137,36 @@ namespace CloudImage.ImagesController
         }
         
         [HttpPost("GenerateKey")]
-        
         public IActionResult GenerateApiKey()
         {
-
             if (_apiKeyService.GetRemainingSlots() == 0)
             {
                 return BadRequest("No available slots.");
             }
             
-            string newApiKey = GenerateRandomApiKey();
-            
+            var newApiKey = GenerateRandomApiKey();
             _apiKeyService.AddApiKey(newApiKey);
-
             return Ok(new { ApiKey = newApiKey });
+        }
+        
+        private IActionResult ValidateApiKeyAndRequest(string apiKey)
+        {
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                return BadRequest("API key is missing.");
+            }
+
+            if (!_apiKeyService.IsValidApiKey(apiKey))
+            {
+                return Unauthorized("Invalid API key.");
+            }
+
+            if (!Request.HasFormContentType)
+            {
+                return BadRequest("Invalid request. Expected multipart form data.");
+            }
+
+            return null; // Indicates validation success
         }
 
         private string GenerateRandomApiKey()
