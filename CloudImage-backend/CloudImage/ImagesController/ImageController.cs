@@ -56,6 +56,19 @@ namespace CloudImage.ImagesController
             return Ok(apiKeyInfo);
         }
 
+        [HttpGet("isValidKey")]
+
+        public IActionResult IsValidKey(string apiKey)
+        {
+            IActionResult validationResult = ValidateApiKeyAndRequest(apiKey);
+            if (ValidateApiKeyAndRequest(apiKey) != null)
+            {
+                return validationResult;
+            }
+
+            return Ok(true);
+        }
+        
         [HttpPost("upload")]
         public async Task<IActionResult> Upload([FromHeader(Name = "ApiKey")] string apiKey)
         {

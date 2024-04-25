@@ -23,4 +23,10 @@ export class ApiService {
       `${this.baseUrl}/Image/apiKeyInfo?apiKey=${apiKey}`
     );
   }
+
+  validateApiKey(apiKey: string): Observable<boolean> {
+    return this.http.get<any>(
+      `${this.baseUrl}/Image/isValidKey?apiKey=${apiKey}`
+    );
+  }
 }

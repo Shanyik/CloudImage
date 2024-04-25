@@ -9,5 +9,18 @@
     ></p-button>
     <p class="mt-25">Remaining Slots: {{ remainingSlots }}</p>
     <h2 *ngIf="apiKey" class="mt-15">Your API Key: {{ apiKey }}</h2>
+    <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+    <input
+      class="mt-15"
+      type="text"
+      placeholder="Enter existing API key"
+      [(ngModel)]="existingApiKey"
+    />
+    <p-button
+      class="mt-15"
+      label="Use Existing API Key"
+      [raised]="true"
+      (click)="useExistingApiKey()"
+    ></p-button>
   </div>
 </div>
