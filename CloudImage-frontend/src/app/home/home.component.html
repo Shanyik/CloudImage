@@ -1,5 +1,13 @@
-<div class="wrapper">
-  <h1>Welcome to Cloud Image!</h1>
-  <button (click)="generateApiKey()">Get Your API Key</button>
-  <p>Remaining Slots: {{ remainingSlots }}</p>
+<div class="container full-center">
+  <div class="column align-center">
+    <h1>Welcome to Cloud Image!</h1>
+    <p-button
+      class="mt-15"
+      label="Get Your API Key"
+      [raised]="true"
+      (click)="generateApiKey()"
+    ></p-button>
+    <p class="mt-25">Remaining Slots: {{ remainingSlots }}</p>
+    <h2 *ngIf="apiKey" class="mt-15">Your API Key: {{ apiKey }}</h2>
+  </div>
 </div>
