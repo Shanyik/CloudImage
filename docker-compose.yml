@@ -1,12 +1,35 @@
 version: '3'
 
 services:
-  CloudImage:
-    image: cloudimage
+
+  ci-frontend:
+    image: ci-frontend
+    build:
+      context: ./CloudImage-frontend
+    container_name: ci-frontend
+    ports:
+      - "80:80"
+    expose:
+      - 80
+    networks:
+      - ci-network 
+    depends_on:
+      - ci-backend
+    environment:      
+      BACKEND_URL: 'http://ci-backend:5246'
+
+  ci-backend:
+    image: ci-backend
     build: 
-      context: ./CloudImage/CloudImage
-    container_name: CloudImage
+      context: ./CloudImage-backend/CloudImage
+    container_name: ci-backend
     ports:
       - "5246:5246"
+    networks:
+      - ci-network
+
+networks:
+  ci-network:
+    driver: bridge
 
     
