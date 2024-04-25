@@ -33,6 +33,11 @@ public class ApiKeyService : IApiKeyService
         return _apiKeys.Any(k => k.Key == apiKey);
     }
     
+    public ApiKey GetApiKeyInfo(string apiKey)
+    {
+        return _apiKeys.FirstOrDefault(k => k.Key == apiKey);
+    }
+    
     public void AddApiKey(string apiKey)
     {
         _apiKeys.Add(new ApiKey { Key = apiKey, AllocatedStorageGB = 1.0, UsedStorageGB = 0});

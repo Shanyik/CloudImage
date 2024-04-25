@@ -42,6 +42,19 @@ namespace CloudImage.ImagesController
             }
             return Ok("No driver.");
         }
+        
+        [HttpGet("apiKeyInfo")]
+        public IActionResult GetApiKeyInfo([FromQuery] string apiKey)
+        {
+            IActionResult validationResult = ValidateApiKeyAndRequest(apiKey);
+            if (ValidateApiKeyAndRequest(apiKey) != null)
+            {
+                return validationResult;
+            }
+
+            var apiKeyInfo = _apiKeyService.GetApiKeyInfo(apiKey);
+            return Ok(apiKeyInfo);
+        }
 
         [HttpPost("upload")]
         public async Task<IActionResult> Upload([FromHeader(Name = "ApiKey")] string apiKey)
@@ -51,6 +64,11 @@ namespace CloudImage.ImagesController
             if (ValidateApiKeyAndRequest(apiKey) != null)
             {
                 return validationResult;
+            }
+            
+            if (!Request.HasFormContentType)
+            {
+                return BadRequest("Invalid request. Expected multipart form data.");
             }
             
             var files = Request.Form.Files;
@@ -159,11 +177,6 @@ namespace CloudImage.ImagesController
             if (!_apiKeyService.IsValidApiKey(apiKey))
             {
                 return Unauthorized("Invalid API key.");
-            }
-
-            if (!Request.HasFormContentType)
-            {
-                return BadRequest("Invalid request. Expected multipart form data.");
             }
 
             return null; // Indicates validation success
