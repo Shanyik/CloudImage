@@ -44,7 +44,7 @@ namespace CloudImage.ImagesController
         }
         
         [HttpGet("apiKeyInfo")]
-        public IActionResult GetApiKeyInfo([FromQuery] string apiKey)
+        public IActionResult GetApiKeyInfo( string apiKey)
         {
             IActionResult validationResult = ValidateApiKeyAndRequest(apiKey);
             if (ValidateApiKeyAndRequest(apiKey) != null)
@@ -86,9 +86,9 @@ namespace CloudImage.ImagesController
                 }
 
                 var imageUrls = new List<string>();
-                var totalUploadedSize = files.Sum(file => file.Length);
+                double totalUploadedSize = files.Sum(file => file.Length);
                 var remainingStorage = _apiKeyService.GetRemainingStorage(apiKey);
-                if (totalUploadedSize > remainingStorage * 1024 * 1024) // Convert GB to bytes
+                if (totalUploadedSize / 1024 / 1024 / 1024 > remainingStorage)
                 {
                     return BadRequest("Upload exceeds remaining storage limit.");
                 }

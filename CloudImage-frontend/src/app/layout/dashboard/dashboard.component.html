@@ -1,2 +1,48 @@
-<p>dashboard works!</p>
-<h2 class="mt-15" *ngIf="apiKey">Your API Key: {{ apiKey }}</h2>
+<div class="container full-center">
+  <div class="column align-center">
+    <h2 class="mt-15" *ngIf="apiKey">Your API Key: {{ apiKey }}</h2>
+    <!-- <p-progressBar [value]="usedStorage"></p-progressBar> -->
+    <h2 class="mt-15">Used Storage: {{ usedStorage * 1024 }} Mb</h2>
+    <h2 class="mt-15">Allocated Storage: {{ allocatedStorage * 1024 }} Mb</h2>
+    <h1 class="mt-50">How can you use this?</h1>
+
+    <h4 class="mt-15 mb-50 full-center">
+      This app accepts a multipart form, where you need to put your API key in
+      the request header, and all the images you want to upload in the request
+      body. In the response you will get all the URLs of the uploaded images.
+    </h4>
+    <h4 class="mt-30">C# Example:</h4>
+    <pre>
+        <code>
+            List&lt;string&gt;? imageUrls;
+            var form = new MultipartFormDataContent();
+            
+
+            foreach (var image in images) //Your Images list you want to upload
+            &#123;
+                var stream = imageFile.OpenReadStream();
+                var imageContent = new StreamContent(stream);
+                            
+                imageContent.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data")
+                &#123;
+                    Name = "images",
+                    FileName = imageFile.FileName
+                &#125;;
+                imageContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(imageFile.ContentType);
+                            
+                form.Add(imageContent);
+            &#125;
+            
+            httpClient.DefaultRequestHeaders.Add("ApiKey", apiKey);
+            var response = await _client.PostAsync(_cloudImageLink + "/Image/upload", form);
+
+            if (response.IsSuccessStatusCode)
+            &#123;
+                var imageUrlJson = await response.Content.ReadAsStringAsync();
+                imageUrls = JsonConvert.DeserializeObject&lt;List&lt;string&gt;&gt;(imageUrlJson);
+            &#125;
+            
+        </code>
+    </pre>
+  </div>
+</div>
