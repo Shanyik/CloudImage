@@ -30,4 +30,18 @@ export class ApiService {
       `${this.baseUrl}/Image/isValidKey?apiKey=${apiKey}`
     );
   }
+
+  registerUser(userDetails: any): Observable<any> {
+    return this.http.post<any>(
+      `${this.baseUrl}/api/User/add-user`,
+      userDetails
+    );
+  }
+
+  loginUser(credentials: any): Observable<any> {
+    return this.http.post<any>(
+      `${this.baseUrl}/api/account/login`,
+      credentials
+    );
+  }
 }

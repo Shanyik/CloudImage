@@ -29,19 +29,8 @@ export class HomeComponent implements OnInit {
     this.getRemainingSlots();
   }
 
-  generateApiKey() {
-    this.apiService.generateApiKey().subscribe(
-      (response: any) => {
-        console.log('API Key:', response.apiKey);
-        this.apiKey = response.apiKey;
-        this.cookieService.set('apiKey', this.apiKey);
-        this.router.navigate(['/dashboard']);
-      },
-      (error: any) => {
-        console.error('Error generating API key:', error);
-        // Handle error
-      }
-    );
+  goToRegistration() {
+    this.router.navigate(['/registration']);
   }
 
   useExistingApiKey() {

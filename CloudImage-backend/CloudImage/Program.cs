@@ -91,7 +91,7 @@ app.MapControllers();
 app.UseCors(corsPolicyBuilder =>
 {
     corsPolicyBuilder
-        .WithOrigins("http://132.226.207.234", "http://localhost")
+        .WithOrigins("http://132.226.207.234", "http://localhost:4200")
         .AllowAnyMethod()
         .AllowAnyHeader()
         .AllowCredentials();

@@ -3,9 +3,9 @@
     <h1>Welcome to Cloud Image!</h1>
     <p-button
       class="mt-15"
-      label="Get Your API Key"
+      label="Registration"
       [raised]="true"
-      (click)="generateApiKey()"
+      (click)="goToRegistration()"
     ></p-button>
     <p class="mt-25">Remaining Slots: {{ remainingSlots }}</p>
     <h2 *ngIf="apiKey" class="mt-15">Your API Key: {{ apiKey }}</h2>
