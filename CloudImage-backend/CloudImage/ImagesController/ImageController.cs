@@ -1,4 +1,4 @@
-﻿using CloudImage.Service;
+﻿using CloudImage.Repository;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CloudImage.ImagesController
@@ -8,27 +8,47 @@ namespace CloudImage.ImagesController
     [Route("[controller]")]
     public class ImageController : ControllerBase
     {
-        private readonly IApiKeyService _apiKeyService;
+        private readonly IImageRepository _imageRepository;
         private readonly string _baseUrl;
         private readonly string _imagesDirectory;
+        private readonly int _maxSlots = 10;
 
-        public ImageController(IApiKeyService apiKeyService, IHttpContextAccessor httpContextAccessor)
+        public ImageController(IHttpContextAccessor httpContextAccessor, IImageRepository imageRepository)
         {
-            _apiKeyService = apiKeyService;
+            _imageRepository = imageRepository;
             _baseUrl = $"{httpContextAccessor.HttpContext?.Request.Scheme}://{httpContextAccessor.HttpContext!.Request.Host}/images/";
             _imagesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Images");
         }
 
 
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAll()
+        {
+            try
+            {
+                var apiKeys = await _imageRepository.GetAll();
+                if (!apiKeys.Any())
+                {
+                    return NotFound();
+                }
+
+                return Ok(apiKeys);
+            }
+            catch (Exception e)
+            {
+                return BadRequest("not found");
+            }
+        }
+        
         [HttpGet("StatusCheck")]
         public IActionResult StatusCheck()
         {
             return Ok("Connection is good.");
         }
         
-        [HttpGet("CheckStorage")]
+        [HttpGet("CheckAllStorage")]
         
-        public IActionResult CheckStorage()
+        public IActionResult CheckAllStorage()
         {
             var allDrives = DriveInfo.GetDrives();
             foreach (var drive in allDrives)
@@ -42,41 +62,36 @@ namespace CloudImage.ImagesController
             }
             return Ok("No driver.");
         }
-        
+
         [HttpGet("apiKeyInfo")]
-        public IActionResult GetApiKeyInfo( string apiKey)
+        public async Task<IActionResult> GetApiKeyInfo(string key)
         {
-            IActionResult validationResult = ValidateApiKeyAndRequest(apiKey);
-            if (ValidateApiKeyAndRequest(apiKey) != null)
+
+            try
             {
-                return validationResult;
+                var apiKey = await _imageRepository.GetByKey(key);
+                if (apiKey == null)
+                {
+                    return NotFound("ApiKey not found in database.");
+                }
+                return Ok(apiKey);
             }
-
-            var apiKeyInfo = _apiKeyService.GetApiKeyInfo(apiKey);
-            return Ok(apiKeyInfo);
-        }
-
-        [HttpGet("isValidKey")]
-
-        public IActionResult IsValidKey(string apiKey)
-        {
-            IActionResult validationResult = ValidateApiKeyAndRequest(apiKey);
-            if (ValidateApiKeyAndRequest(apiKey) != null)
+            catch (Exception e)
             {
-                return validationResult;
+                return BadRequest("Error connecting to the database! Try again later!");
             }
-
-            return Ok(true);
+            
+            
         }
         
         [HttpPost("upload")]
-        public async Task<IActionResult> Upload([FromHeader(Name = "ApiKey")] string apiKey)
+        public async Task<IActionResult> Upload([FromHeader(Name = "ApiKey")] string key)
         {
 
-            IActionResult validationResult = ValidateApiKeyAndRequest(apiKey);
-            if (ValidateApiKeyAndRequest(apiKey) != null)
+            var apiKey = await _imageRepository.GetByKey(key);
+            if (apiKey == null)
             {
-                return validationResult;
+                return BadRequest("No / Invalid Apikey!");
             }
             
             if (!Request.HasFormContentType)
@@ -100,11 +115,15 @@ namespace CloudImage.ImagesController
 
                 var imageUrls = new List<string>();
                 double totalUploadedSize = files.Sum(file => file.Length);
-                var remainingStorage = _apiKeyService.GetRemainingStorage(apiKey);
+                var remainingStorage = apiKey.AllocatedStorageGB - apiKey.UsedStorageGB;
                 if (totalUploadedSize / 1024 / 1024 / 1024 > remainingStorage)
                 {
                     return BadRequest("Upload exceeds remaining storage limit.");
                 }
+
+                apiKey.UsedStorageGB += totalUploadedSize / 1024 / 1024 / 1024;
+                
+                await _imageRepository.Update(apiKey);
 
                 foreach (var file in files)
                 {
@@ -114,7 +133,7 @@ namespace CloudImage.ImagesController
                     {
                         await file.CopyToAsync(stream);
                     }
-                    _apiKeyService.UpdateUsedStorage(apiKey, file.Length);
+                    
                     var imageUrl = _baseUrl + uniqueFileName;
                     imageUrls.Add(imageUrl);
                 }
@@ -128,13 +147,13 @@ namespace CloudImage.ImagesController
         }
 
         [HttpPost("delete")]
-        public IActionResult Delete([FromHeader(Name = "ApiKey")] string apiKey, IList<string> urlList)
+        public async Task<IActionResult> Delete([FromHeader(Name = "ApiKey")] string key, IList<string> urlList)
         {
             
-            IActionResult validationResult = ValidateApiKeyAndRequest(apiKey);
-            if (ValidateApiKeyAndRequest(apiKey) != null)
+            var apiKey = await _imageRepository.GetByKey(key);
+            if (apiKey == null)
             {
-                return validationResult;
+                return BadRequest("No / Invalid Apikey!");
             }
             
             try
@@ -151,7 +170,8 @@ namespace CloudImage.ImagesController
                         System.IO.File.Delete(filePath);
                     }
                 }
-                _apiKeyService.UpdateUsedStorage(apiKey, - totalDeletedSize);
+                apiKey.UsedStorageGB -= totalDeletedSize / (1024 * 1024 * 1024);
+                await _imageRepository.Update(apiKey);
                 return Ok();
             }
             catch (Exception ex)
@@ -161,43 +181,11 @@ namespace CloudImage.ImagesController
         }
         
         [HttpGet("remainingSlots")]
-        public IActionResult GetRemainingSlots()
+        public async Task<IActionResult> GetRemainingSlots()
         {
-            int remainingSlots = _apiKeyService.GetRemainingSlots();
-            return Ok(remainingSlots);
-        }
-        
-        [HttpPost("GenerateKey")]
-        public IActionResult GenerateApiKey()
-        {
-            if (_apiKeyService.GetRemainingSlots() == 0)
-            {
-                return BadRequest("No available slots.");
-            }
             
-            var newApiKey = GenerateRandomApiKey();
-            _apiKeyService.AddApiKey(newApiKey);
-            return Ok(new { ApiKey = newApiKey });
-        }
-        
-        private IActionResult ValidateApiKeyAndRequest(string apiKey)
-        {
-            if (string.IsNullOrEmpty(apiKey))
-            {
-                return BadRequest("API key is missing.");
-            }
-
-            if (!_apiKeyService.IsValidApiKey(apiKey))
-            {
-                return Unauthorized("Invalid API key.");
-            }
-
-            return null; // Indicates validation success
-        }
-
-        private string GenerateRandomApiKey()
-        {
-            return Guid.NewGuid().ToString("N");
+            var apiKeyList = await _imageRepository.GetAll();
+            return Ok(_maxSlots - apiKeyList.Count());
         }
         
         private string GetFileNameFromUrl(string url)

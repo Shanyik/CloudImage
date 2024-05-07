@@ -1,10 +1,12 @@
-using CloudImage.Service;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.FileProviders;
-using System.IO;
+using System.Security.Claims;
+using CloudImage.Data;
+using CloudImage.Model;
+using CloudImage.Repository;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,11 +14,32 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey
+    });
+    
+    options.OperationFilter<SecurityRequirementsOperationFilter>();
+});
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddDbContext<AppDbContext>(options => 
+    options.UseNpgsql(builder.Configuration.GetConnectionString("WebApiDatabase")));
 
-// Register your IApiKeyService implementation
-builder.Services.AddSingleton<IApiKeyService, ApiKeyService>();
+//Auth
+
+builder.Services.AddAuthorization();
+
+builder.Services
+    .AddIdentityApiEndpoints<AppUser>()
+    .AddEntityFrameworkStores<AppDbContext>();
+
+//Services
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<IImageRepository, ImageRepository>();
 
 var app = builder.Build();
 
@@ -31,6 +54,22 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthorization();
 
+//Auth
+
+app.MapGroup("/api/account").MapIdentityApi<AppUser>();
+
+app.MapPost("/api/account/logout", async (SignInManager<AppUser> signInManager) =>
+{
+    await signInManager.SignOutAsync();
+    return Results.Ok();
+}).RequireAuthorization();
+
+app.MapGet("/api/pingauth", (ClaimsPrincipal user) =>
+{
+    var email = user.FindFirstValue(ClaimTypes.Email);
+    return Results.Json(new { Email = email});
+}).RequireAuthorization();
+
 var imagesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Images");
 if (!Directory.Exists(imagesDirectory))
 {
@@ -43,12 +82,16 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/images"
 });
 
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
 app.MapControllers();
 
 app.UseCors(corsPolicyBuilder =>
 {
     corsPolicyBuilder
-        .SetIsOriginAllowed((host) => true)
+        .WithOrigins("http://132.226.207.234", "http://localhost")
         .AllowAnyMethod()
         .AllowAnyHeader()
         .AllowCredentials();

@@ -27,6 +27,27 @@ services:
       - "5246:5246"
     networks:
       - ci-network
+  
+  ci-db:
+    container_name: ci-db
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=CloudImage
+    ports:
+      - "5443:5432"
+    expose:
+      - 5433
+      - 5432
+    volumes:
+      - app_data:/var/lib/postgresql/data
+    networks:
+      - ci-network
+
+volumes:
+  app_data:
 
 networks:
   ci-network:
