@@ -19,10 +19,16 @@ export class ApiService {
     return this.http.get<number>(`${this.baseUrl}/Image/remainingSlots`);
   }
 
-  getApiKeyInfo(apiKey: string): Observable<any> {
-    return this.http.get<any>(
-      `${this.baseUrl}/Image/apiKeyInfo?apiKey=${apiKey}`
-    );
+  getApiKeyInfo(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/api/user`, {
+      withCredentials: true,
+    });
+  }
+
+  pingAuth(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/api/pingauth`, {
+      withCredentials: true,
+    });
   }
 
   validateApiKey(apiKey: string): Observable<boolean> {
@@ -40,8 +46,15 @@ export class ApiService {
 
   loginUser(credentials: any): Observable<any> {
     return this.http.post<any>(
-      `${this.baseUrl}/api/account/login`,
-      credentials
+      `${this.baseUrl}/api/account/login?useCookies=true`,
+      credentials,
+      { withCredentials: true }
     );
+  }
+
+  logout(): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/api/account/logout`, '', {
+      withCredentials: true,
+    });
   }
 }

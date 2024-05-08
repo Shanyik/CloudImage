@@ -21,13 +21,20 @@ export class LoginComponent {
     private cookieService: CookieService
   ) {}
 
+  ngOnInit(): void {
+    this.pingAuth();
+  }
+
+  pingAuth() {
+    this.cookieService.get('login') ? this.router.navigate(['/dashboard']) : '';
+  }
+
   login() {
     this.apiService.loginUser(this.credentials).subscribe(
       (response) => {
-        console.log(response);
-        // Handle success, e.g., store token in local storage and redirect
-        this.cookieService.set('token', response.accessToken);
-        this.router.navigate(['/dashboard']); // Redirect to dashboard after successful login
+        this.cookieService.set('login', 'true');
+        this.router.navigate(['/dashboard']);
+        location.reload();
       },
       (error) => {
         console.error(error);

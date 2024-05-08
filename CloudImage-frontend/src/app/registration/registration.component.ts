@@ -26,7 +26,7 @@ export class RegistrationComponent {
       (response) => {
         console.log(response);
         // Handle success, e.g., show a success message
-        this.router.navigate(['/login']); // Redirect to login page after successful registration
+        this.router.navigate(['/login']);
       },
       (error) => {
         console.error(error);

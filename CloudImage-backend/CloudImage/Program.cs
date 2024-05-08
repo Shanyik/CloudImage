@@ -70,6 +70,20 @@ app.MapGet("/api/pingauth", (ClaimsPrincipal user) =>
     return Results.Json(new { Email = email});
 }).RequireAuthorization();
 
+app.MapGet("/api/user", async (AppDbContext dbContext, ClaimsPrincipal user) =>
+{
+    var email = user.FindFirstValue(ClaimTypes.Email);
+
+    var apiKeyInfo = await dbContext.GetApiKeyByEmail(email);
+
+    if (apiKeyInfo == null)
+    {
+        return Results.NotFound();
+    }
+    
+    return Results.Json(apiKeyInfo);
+}).RequireAuthorization();
+
 var imagesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Images");
 if (!Directory.Exists(imagesDirectory))
 {
@@ -81,6 +95,8 @@ app.UseStaticFiles(new StaticFileOptions
     FileProvider = new PhysicalFileProvider(imagesDirectory),
     RequestPath = "/images"
 });
+
+
 
 app.UseHttpsRedirection();
 
