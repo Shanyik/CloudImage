@@ -4,7 +4,8 @@ namespace CloudImage.Repository;
 
 public interface IImageRepository
 {
-    Task<IEnumerable<ApiKey>> GetAll();
-    Task<ApiKey?> GetByKey(string key);
-    Task Update(ApiKey apiKey);
+    Task<IEnumerable<Image>> GetAll();
+    Task<Image?> GetByUrl(string url);
+    Task Add(Image image);
+    Task Delete(string url);
 }

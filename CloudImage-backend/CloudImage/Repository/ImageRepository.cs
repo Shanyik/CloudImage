@@ -12,20 +12,26 @@ public class ImageRepository : IImageRepository
     {
         _context = context;
     }
-    
-    public async Task<IEnumerable<ApiKey>> GetAll()
+    public async Task<IEnumerable<Image>> GetAll()
     {
-        return await _context.ApiKeys.Include(c => c.User).AsNoTracking().ToListAsync();
+        return await _context.Images.ToListAsync();
     }
-    
-    public async Task<ApiKey?> GetByKey(string key)
+
+    public async Task<Image?> GetByUrl(string url)
     {
-        return await _context.ApiKeys.FirstOrDefaultAsync(c => c.Key == key);
+        return await _context.Images.FirstOrDefaultAsync(c => c.ImageUrl == url);
     }
-    
-    public async Task Update(ApiKey apiKey)
+
+    public async Task Add(Image image)
     {
-        _context.Entry(apiKey).State = EntityState.Modified;
+        await _context.AddAsync(image);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task Delete(string url)
+    {
+        Image? image = await _context.Images.FirstOrDefaultAsync(c => c.ImageUrl == url);
+        _context.Images.Remove(image);
         await _context.SaveChangesAsync();
     }
 }

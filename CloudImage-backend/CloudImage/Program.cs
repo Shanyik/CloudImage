@@ -39,6 +39,7 @@ builder.Services
 
 //Services
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<IApiRepository, ApiRepository>();
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
 
 var app = builder.Build();

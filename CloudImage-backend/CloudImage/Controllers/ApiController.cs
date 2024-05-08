@@ -1,20 +1,23 @@
-﻿using CloudImage.Repository;
+﻿using CloudImage.Model;
+using CloudImage.Repository;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CloudImage.ImagesController
+namespace CloudImage.Controllers
 {
     
     [ApiController]
     [Route("[controller]")]
-    public class ImageController : ControllerBase
+    public class ApiController : ControllerBase
     {
+        private readonly IApiRepository _apiRepository;
         private readonly IImageRepository _imageRepository;
         private readonly string _baseUrl;
         private readonly string _imagesDirectory;
         private readonly int _maxSlots = 10;
 
-        public ImageController(IHttpContextAccessor httpContextAccessor, IImageRepository imageRepository)
+        public ApiController(IHttpContextAccessor httpContextAccessor, IApiRepository apiRepository, IImageRepository imageRepository)
         {
+            _apiRepository = apiRepository;
             _imageRepository = imageRepository;
             _baseUrl = $"{httpContextAccessor.HttpContext?.Request.Scheme}://{httpContextAccessor.HttpContext!.Request.Host}/images/";
             _imagesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Images");
@@ -26,7 +29,7 @@ namespace CloudImage.ImagesController
         {
             try
             {
-                var apiKeys = await _imageRepository.GetAll();
+                var apiKeys = await _apiRepository.GetAll();
                 if (!apiKeys.Any())
                 {
                     return NotFound();
@@ -69,7 +72,7 @@ namespace CloudImage.ImagesController
 
             try
             {
-                var apiKey = await _imageRepository.GetByKey(key);
+                var apiKey = await _apiRepository.GetByKey(key);
                 if (apiKey == null)
                 {
                     return NotFound("ApiKey not found in database.");
@@ -88,7 +91,7 @@ namespace CloudImage.ImagesController
         public async Task<IActionResult> Upload([FromHeader(Name = "ApiKey")] string key)
         {
 
-            var apiKey = await _imageRepository.GetByKey(key);
+            var apiKey = await _apiRepository.GetByKey(key);
             if (apiKey == null)
             {
                 return BadRequest("No / Invalid Apikey!");
@@ -123,7 +126,7 @@ namespace CloudImage.ImagesController
 
                 apiKey.UsedStorageGB += totalUploadedSize / 1024 / 1024 / 1024;
                 
-                await _imageRepository.Update(apiKey);
+                await _apiRepository.Update(apiKey);
 
                 foreach (var file in files)
                 {
@@ -135,6 +138,17 @@ namespace CloudImage.ImagesController
                     }
                     
                     var imageUrl = _baseUrl + uniqueFileName;
+                    
+                    
+                    
+                    var image = new Image
+                    {
+                        ImageUrl = imageUrl,
+                        Byte = file.Length,
+                        ApiKeyId = apiKey.Id
+                    };
+                    
+                    await _imageRepository.Add(image);
                     imageUrls.Add(imageUrl);
                 }
                 
@@ -150,7 +164,7 @@ namespace CloudImage.ImagesController
         public async Task<IActionResult> Delete([FromHeader(Name = "ApiKey")] string key, IList<string> urlList)
         {
             
-            var apiKey = await _imageRepository.GetByKey(key);
+            var apiKey = await _apiRepository.GetByKey(key);
             if (apiKey == null)
             {
                 return BadRequest("No / Invalid Apikey!");
@@ -168,10 +182,11 @@ namespace CloudImage.ImagesController
                         var fileInfo = new FileInfo(filePath);
                         totalDeletedSize += fileInfo.Length;
                         System.IO.File.Delete(filePath);
+                        await _imageRepository.Delete(url);
                     }
                 }
                 apiKey.UsedStorageGB -= totalDeletedSize / (1024 * 1024 * 1024);
-                await _imageRepository.Update(apiKey);
+                await _apiRepository.Update(apiKey);
                 return Ok();
             }
             catch (Exception ex)
@@ -184,7 +199,7 @@ namespace CloudImage.ImagesController
         public async Task<IActionResult> GetRemainingSlots()
         {
             
-            var apiKeyList = await _imageRepository.GetAll();
+            var apiKeyList = await _apiRepository.GetAll();
             return Ok(_maxSlots - apiKeyList.Count());
         }
         
