@@ -57,4 +57,11 @@ export class ApiService {
       withCredentials: true,
     });
   }
+
+  uploadImage(formData: FormData, apiKey: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/Api/upload`, formData, {
+      headers: { ApiKey: apiKey },
+      withCredentials: true,
+    });
+  }
 }
