@@ -1,0 +1,30 @@
+.wrapper {
+  position: relative;
+  box-sizing: border-box;
+  padding: 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  vertical-align: middle;
+  height: 100vh;
+  background: url("../../../assets/Images/background.jpg") no-repeat center
+    center fixed;
+  -webkit-background-size: cover;
+  -o-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+}
+
+.image-container {
+  text-align: center;
+}
+
+.logo {
+  width: 100%;
+}
+
+.title {
+  font-size: 32px;
+  margin-top: 20px;
+  text-align: center;
+}

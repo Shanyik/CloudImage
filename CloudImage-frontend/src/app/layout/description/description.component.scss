@@ -1,0 +1,24 @@
+.wrapper {
+  background: #f2f2f2;
+}
+
+.description-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 70vw;
+}
+
+.section-title {
+  font-size: 34px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.description-text {
+  font-size: 26px;
+  line-height: 1.5;
+}

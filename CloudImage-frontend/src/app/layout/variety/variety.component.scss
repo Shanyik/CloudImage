@@ -1,0 +1,41 @@
+.variety-container {
+  position: relative;
+  box-sizing: border-box;
+  text-align: center;
+  background: url("../../../assets/Images/background.jpg") no-repeat center
+    center fixed;
+  background-size: cover;
+  height: 50vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.border {
+  background-color: #ffffff;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.use-cases {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.use-case {
+  margin: 0 20px;
+  max-width: 300px;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.use-case-description {
+  font-size: 16px;
+  margin-top: 10px;
+}

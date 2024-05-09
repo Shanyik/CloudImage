@@ -1,7 +1,11 @@
-<div class="full-center">
-  <form class="column gap-1" (ngSubmit)="register()">
+<div class="registration-container full-center">
+  <form
+    class="registration-form column gap-1"
+    (ngSubmit)="register()"
+    #registrationForm="ngForm"
+  >
     <h2>Register</h2>
-    <div class="row gap-1">
+    <div class="input-row">
       <label for="email">Email:</label>
       <input
         type="email"
@@ -9,9 +13,18 @@
         name="email"
         [(ngModel)]="model.email"
         required
+        email
+        #email="ngModel"
       />
+      <div
+        *ngIf="email!.invalid && (email!.dirty || email!.touched)"
+        class="error-message"
+      >
+        <div *ngIf="email!.errors!['required']">Email is required.</div>
+        <div *ngIf="email!.errors!['email']">Invalid email format.</div>
+      </div>
     </div>
-    <div class="row gap-1">
+    <div class="input-row">
       <label for="username">Username:</label>
       <input
         type="text"
@@ -19,9 +32,16 @@
         name="username"
         [(ngModel)]="model.username"
         required
+        #username="ngModel"
       />
+      <div
+        *ngIf="username!.invalid && (username!.dirty || username!.touched)"
+        class="error-message"
+      >
+        <div *ngIf="username!.errors!['required']">Username is required.</div>
+      </div>
     </div>
-    <div class="row gap-1">
+    <div class="input-row">
       <label for="password">Password:</label>
       <input
         type="password"
@@ -29,8 +49,28 @@
         name="password"
         [(ngModel)]="model.password"
         required
+        minlength="8"
+        #password="ngModel"
       />
+      <div
+        *ngIf="password!.invalid && (password!.dirty || password!.touched)"
+        class="error-message"
+      >
+        <div *ngIf="password!.errors!['required']">Password is required.</div>
+        <div *ngIf="password!.errors!['minlength']">
+          Password must be at least 8 characters long.
+        </div>
+        <div *ngIf="password!.errors!['pattern']">
+          Password must contain at least one lowercase letter, one uppercase
+          letter, one number, and one special character.
+        </div>
+      </div>
     </div>
-    <button type="submit" class="mt-15">Register</button>
+    <p-button
+      label="Registration"
+      severity="success"
+      [raised]="true"
+      type="submit"
+    ></p-button>
   </form>
 </div>

@@ -1,4 +1,36 @@
-<header class="wrapper row full-center">
-  <p>CloudImage</p>
-  <button *ngIf="isLoggedIn" (click)="logout()">Logout</button>
-</header>
+<div class="header container space-between align-center">
+  <div class="logo">
+    <img src="../../../assets/Images/logo.png" alt="Logo" />
+  </div>
+  <div class="buttons">
+    <p-button
+      *ngIf="!isLoggedIn"
+      class="mr-10"
+      label="Login"
+      severity="success"
+      [raised]="true"
+      (click)="goToLogin()"
+    ></p-button>
+    <p-button
+      *ngIf="!isLoggedIn"
+      label="Registration"
+      severity="help"
+      [raised]="true"
+      (click)="goToRegistration()"
+    ></p-button>
+    <p-button
+      *ngIf="isLoggedIn"
+      class="mr-10"
+      label="Dashboard"
+      [raised]="true"
+      (click)="goToDashboard()"
+    ></p-button>
+    <p-button
+      *ngIf="isLoggedIn"
+      label="Logout"
+      severity="danger"
+      [raised]="true"
+      (click)="logout()"
+    ></p-button>
+  </div>
+</div>

@@ -3,11 +3,12 @@ import { ApiService } from '../../services/api.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { CookieService } from 'ngx-cookie-service';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ButtonModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
 })
@@ -26,6 +27,18 @@ export class HeaderComponent {
         this.isLoggedIn = true;
       }
     });
+  }
+
+  goToLogin(): void {
+    this.router.navigate(['/login']);
+  }
+
+  goToRegistration(): void {
+    this.router.navigate(['/registration']);
+  }
+
+  goToDashboard(): void {
+    this.router.navigate(['/dashboard']);
   }
 
   logout(): void {

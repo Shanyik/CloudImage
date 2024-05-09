@@ -1,17 +1,17 @@
-<div class="full-center">
-  <form class="column gap-1" (ngSubmit)="login()">
+<div class="login-container full-center">
+  <form class="login-form column gap-1" (ngSubmit)="login()">
     <h2>Login</h2>
-    <div class="row gap-1">
-      <label for="email">Email:</label>
+    <div class="input-row">
+      <label for="username">Username:</label>
       <input
-        type="email"
-        id="email"
-        name="email"
+        type="username"
+        id="username"
+        name="username"
         [(ngModel)]="credentials.email"
         required
       />
     </div>
-    <div class="row gap-1">
+    <div class="input-row">
       <label for="password">Password:</label>
       <input
         type="password"
@@ -21,6 +21,11 @@
         required
       />
     </div>
-    <button type="submit" class="mt-15">Login</button>
+    <p-button
+      label="Login"
+      severity="success"
+      [raised]="true"
+      type="submit"
+    ></p-button>
   </form>
 </div>
