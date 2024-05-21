@@ -53,7 +53,11 @@ export class DashboardComponent implements OnInit {
 
     this.apiService
       .uploadImage(formData, this.apiKey)
-      .subscribe((response: any) => {
+      .subscribe((response: string[]) => {
+        response.forEach((element) => {
+          console.log(element);
+          window.open(element, '_blank');
+        });
         location.reload();
       });
   }

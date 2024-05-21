@@ -41,6 +41,10 @@ export class HeaderComponent {
     this.router.navigate(['/dashboard']);
   }
 
+  goToHome(): void {
+    this.router.navigate(['']);
+  }
+
   logout(): void {
     this.apiService.logout().subscribe(() => {});
     this.cookieService.delete('login');

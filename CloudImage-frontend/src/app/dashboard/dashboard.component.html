@@ -3,7 +3,9 @@
     <h2 class="api-key mt-15" *ngIf="apiKey">Your API Key: {{ apiKey }}</h2>
     <h2 class="api-key mt-15" *ngIf="link">Api Link: {{ link }}</h2>
     <h2 class="storage mt-15">Used Storage: {{ usedStorage }} Mb</h2>
-    <h2 class="storage mt-15">Allocated Storage: {{ allocatedStorage }} Mb</h2>
+    <h2 class="storage mt-15 mb-50">
+      Allocated Storage: {{ allocatedStorage }} Mb
+    </h2>
 
     <div>
       <input type="file" multiple (change)="onFileChange($event)" />

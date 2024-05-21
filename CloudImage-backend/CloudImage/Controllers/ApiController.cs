@@ -139,8 +139,6 @@ namespace CloudImage.Controllers
                     
                     var imageUrl = _baseUrl + uniqueFileName;
                     
-                    
-                    
                     var image = new Image
                     {
                         ImageUrl = imageUrl,
