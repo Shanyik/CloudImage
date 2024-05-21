@@ -26,7 +26,7 @@ export class ImageViewerComponent implements OnInit {
   paginatedImages: any[] = [];
   totalRecords: number = 0;
   rowsPerPage: number = 12;
-  apiKey: string = 'fc88eb3ea03146fbb40d06db27ae13af'; // Replace with actual API key
+  apiKey!: string;
 
   constructor(
     private apiService: ApiService,
@@ -41,6 +41,7 @@ export class ImageViewerComponent implements OnInit {
     this.apiService.getApiKeyInfo().subscribe(
       (response: any) => {
         this.images = response.images;
+        this.apiKey = response.key;
         this.totalRecords = this.images.length;
         this.paginate({ first: 0, rows: this.rowsPerPage });
       },
@@ -49,7 +50,6 @@ export class ImageViewerComponent implements OnInit {
       }
     );
   }
-
   paginate(event: any) {
     const start = event.first;
     const end = start + event.rows;

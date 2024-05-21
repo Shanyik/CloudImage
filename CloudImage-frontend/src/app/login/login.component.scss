@@ -1,8 +1,25 @@
+.wrapper {
+  position: relative;
+  box-sizing: border-box;
+  padding: 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  vertical-align: middle;
+  height: 83.9vh;
+  background: url("../../assets/Images/background.jpg") no-repeat center center
+    fixed;
+  -webkit-background-size: cover;
+  -o-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+}
+
 .login-container {
   background-color: #ffffff; /* White background */
   border-radius: 15px; /* Rounded edges */
   padding: 20px; /* Add padding */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7); /* Add a subtle shadow */
   min-width: 350px; /* Limit width */
   min-height: 350px;
 

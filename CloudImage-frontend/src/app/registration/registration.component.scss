@@ -1,11 +1,26 @@
-.registration-container {
-  background-color: #ffffff; /* White background */
-  border-radius: 15px; /* Rounded edges */
-  padding: 20px; /* Add padding */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
-  min-width: 400px; /* Limit width */
+.wrapper {
+  position: relative;
+  box-sizing: border-box;
+  padding: 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  vertical-align: middle;
+  height: 83.9vh;
+  background: url("../../assets/Images/background.jpg") no-repeat center center
+    fixed;
+  -webkit-background-size: cover;
+  -o-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+}
 
-  /* Center the container horizontally and vertically */
+.registration-container {
+  background-color: #ffffff;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+  min-width: 400px;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -19,16 +34,16 @@
 .input-row {
   display: flex;
   flex-direction: column;
-  margin-bottom: 15px; /* Adjust margin bottom */
+  margin-bottom: 15px;
 }
 
 .input-row label {
-  margin-bottom: 5px; /* Adjust margin bottom for labels */
+  margin-bottom: 5px;
 }
 
 .p-button {
   width: 100%;
-  margin-top: 15px; /* Adjust margin top */
+  margin-top: 15px;
 }
 
 .error-message {

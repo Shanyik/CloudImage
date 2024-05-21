@@ -4,13 +4,14 @@
       <p-image
         [src]="image.imageUrl"
         alt="Image"
-        width="150"
-        height="150"
+        width="100%"
+        height="auto"
       ></p-image>
       <button
         pButton
         label="Delete"
         icon="pi pi-trash"
+        class="p-button-danger"
         (click)="deleteImage(image.imageUrl)"
       ></button>
     </div>
@@ -19,6 +20,6 @@
     [rows]="rowsPerPage"
     [totalRecords]="totalRecords"
     (onPageChange)="paginate($event)"
-  ></p-paginator>
+  >
+  </p-paginator>
 </div>
-<p-toast position="top-right"></p-toast>

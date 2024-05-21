@@ -1,32 +1,34 @@
-<div class="login-container full-center">
-  <form class="login-form column gap-1" (ngSubmit)="login()">
-    <h2>Login</h2>
-    <div class="input-row">
-      <label for="username">Username:</label>
-      <input
-        type="username"
-        id="username"
-        name="username"
-        [(ngModel)]="credentials.email"
-        required
-      />
-    </div>
-    <div class="input-row">
-      <label for="password">Password:</label>
-      <input
-        type="password"
-        id="password"
-        name="password"
-        [(ngModel)]="credentials.password"
-        required
-      />
-    </div>
-    <p-button
-      label="Login"
-      severity="success"
-      [raised]="true"
-      type="submit"
-    ></p-button>
-  </form>
+<div class="wrapper">
+  <div class="login-container full-center">
+    <form class="login-form column gap-1" (ngSubmit)="login()">
+      <h2>Login</h2>
+      <div class="input-row">
+        <label for="username">Username:</label>
+        <input
+          type="username"
+          id="username"
+          name="username"
+          [(ngModel)]="credentials.email"
+          required
+        />
+      </div>
+      <div class="input-row">
+        <label for="password">Password:</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          [(ngModel)]="credentials.password"
+          required
+        />
+      </div>
+      <p-button
+        label="Login"
+        severity="success"
+        [raised]="true"
+        type="submit"
+      ></p-button>
+    </form>
+  </div>
 </div>
 <p-toast position="top-right"></p-toast>
