@@ -45,6 +45,10 @@ export class HeaderComponent {
     this.router.navigate(['']);
   }
 
+  goToImageViewer(): void {
+    this.router.navigate(['/imageViewer']);
+  }
+
   logout(): void {
     this.apiService.logout().subscribe(() => {});
     this.cookieService.delete('login');

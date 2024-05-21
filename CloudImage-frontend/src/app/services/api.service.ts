@@ -64,4 +64,10 @@ export class ApiService {
       withCredentials: true,
     });
   }
+  deleteImage(urlList: Array<string>, apiKey: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/Api/delete`, urlList, {
+      headers: { ApiKey: apiKey },
+      withCredentials: true,
+    });
+  }
 }

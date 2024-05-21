@@ -27,6 +27,13 @@
     ></p-button>
     <p-button
       *ngIf="isLoggedIn"
+      class="mr-10"
+      label="Images"
+      [raised]="true"
+      (click)="goToImageViewer()"
+    ></p-button>
+    <p-button
+      *ngIf="isLoggedIn"
       label="Logout"
       severity="danger"
       [raised]="true"

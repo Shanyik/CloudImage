@@ -1,0 +1,24 @@
+<div class="image-viewer-container">
+  <div class="image-grid">
+    <div *ngFor="let image of paginatedImages" class="image-item">
+      <p-image
+        [src]="image.imageUrl"
+        alt="Image"
+        width="150"
+        height="150"
+      ></p-image>
+      <button
+        pButton
+        label="Delete"
+        icon="pi pi-trash"
+        (click)="deleteImage(image.imageUrl)"
+      ></button>
+    </div>
+  </div>
+  <p-paginator
+    [rows]="rowsPerPage"
+    [totalRecords]="totalRecords"
+    (onPageChange)="paginate($event)"
+  ></p-paginator>
+</div>
+<p-toast position="top-right"></p-toast>
