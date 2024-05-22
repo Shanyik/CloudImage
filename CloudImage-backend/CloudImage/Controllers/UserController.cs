@@ -47,7 +47,7 @@ public class UserController : ControllerBase
     
     private ApiKey CreateApiKey()
     {
-        return new ApiKey { Key = GenerateRandomApiKey(), AllocatedStorageGB = 1.0, UsedStorageGB = 0};
+        return new ApiKey { Key = GenerateRandomApiKey(), AllocatedStorageGB = 3.0, UsedStorageGB = 0};
     }
     
     private static string GenerateRandomApiKey()

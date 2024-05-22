@@ -1,18 +1,31 @@
 <div class="usage-container full-center">
   <div class="column align-center">
     <h2 class="api-key mt-15" *ngIf="apiKey">Your API Key: {{ apiKey }}</h2>
-    <h2 class="api-key mt-15" *ngIf="link">Api Link: {{ link }}</h2>
-    <h2 class="storage mt-15">Used Storage: {{ usedStorage }} Mb</h2>
+    <h2 class="api-key mt-15" *ngIf="link">API Link: {{ link }}</h2>
+    <h2 class="storage mt-15">Used Storage: {{ usedStorage }} MB</h2>
     <h2 class="storage mt-15 mb-50">
-      Allocated Storage: {{ allocatedStorage }} Mb
+      Allocated Storage: {{ allocatedStorage }} MB
     </h2>
 
-    <div>
-      <input type="file" multiple (change)="onFileChange($event)" />
-      <button (click)="onUpload()">Upload</button>
+    <div class="upload-section mt-15 mb-30">
+      <input
+        type="file"
+        multiple
+        (change)="onFileChange($event)"
+        class="file-input"
+      />
+      <button
+        pButton
+        label="Upload"
+        (click)="onUpload()"
+        class="upload-btn mt-15 mb-15"
+      ></button>
     </div>
-    <div *ngFor="let file of files">
-      <p>{{ file.name }}</p>
+
+    <div class="file-list" *ngIf="files.length">
+      <div *ngFor="let file of files" class="file-item">
+        {{ file.name }}
+      </div>
     </div>
 
     <h1 class="usage-heading mt-50">How can you use this in your API?</h1>
@@ -20,15 +33,24 @@
     <p class="usage-description mt-15 mb-50">
       This app accepts a multipart form, where you need to put your API key in
       the request header, and all the images you want to upload in the request
-      body. In the response you will get all the URLs of the uploaded images.
+      body. In the response, you will get all the URLs of the uploaded images.
     </p>
-    <h4 class="code-example-heading mt-30">C# Example:</h4>
-    <pre class="code-example">
+
+    <h4 class="code-example-heading mt-30">
+      Image upload example (/Api/upload)
+    </h4>
+    <p-panel
+      class="mt-15"
+      header="C# Example"
+      [toggleable]="true"
+      [collapsed]="true"
+    >
+      <pre class="code-example">
         <code>
             List&lt;string&gt;? imageUrls;
             var form = new MultipartFormDataContent();
             
-            foreach (var image in images) //Your Images list you want to upload
+            foreach (var image in images) // Your Images list you want to upload
             &#123;
                 var stream = imageFile.OpenReadStream();
                 var imageContent = new StreamContent(stream);
@@ -44,7 +66,7 @@
             &#125;
             
             httpClient.DefaultRequestHeaders.Add("ApiKey", apiKey);
-            var response = await _client.PostAsync(_cloudImageLink + "/Image/upload", form);
+            var response = await _client.PostAsync(_cloudImageLink + "/Api/upload", form);
 
             if (response.IsSuccessStatusCode)
             &#123;
@@ -53,5 +75,113 @@
             &#125;
         </code>
     </pre>
+    </p-panel>
+
+    <p-panel
+      class="mt-15"
+      header="Js Example"
+      [toggleable]="true"
+      [collapsed]="true"
+    >
+      <pre class="code-example">
+      <code>
+        &lt;script&gt;
+          async function uploadImages() &#123;
+            const apiKey = 'your-api-key'; // Replace with your actual API key
+            const baseUrl = 'link'; // Replace with your actual base URL
+            const files = files;  // Your image files
+  
+            const formData = new FormData();
+            for (const file of files) &#123;
+                formData.append('files[]', file);
+              &#125;
+  
+            try &#123;
+                const response = await fetch(`$&#123;baseUrl&#125;/Api/upload`, &#123;
+                    method: 'POST',
+                    headers: &#123;
+                        'ApiKey': apiKey
+                        &#125;,
+                    body: formData,
+                    credentials: 'include'
+                    &#125;);
+  
+                  if (response.ok) &#123;
+                      const result = await response.json();
+                      console.log('Upload successful:', result);
+                      &#125; else &#123;
+                      console.error('Upload failed:', response.status, response.statusText);
+                      &#125;
+                      &#125; catch (error) &#123;
+                  console.error('Error uploading images:', error);
+                  &#125;
+                &#125;
+          &lt;/script&gt;
+      </code>
+  </pre>
+    </p-panel>
+
+    <h4 class="code-example-heading mt-30">
+      Image delete example (/Api/delete)
+    </h4>
+    <p-panel
+      class="mt-15 p"
+      header="C# Example"
+      [toggleable]="true"
+      [collapsed]="true"
+    >
+      <pre class="code-example">
+        <code>
+            List&lt;string&gt;? imageUrls;  // Your image URLs
+            var content = new StringContent(JsonConvert.SerializeObject(imageUrls), Encoding.UTF8, "application/json");
+
+            var form = new MultipartFormDataContent();
+            form.Add(content, "urlList");
+            httpClient.DefaultRequestHeaders.Add("ApiKey", apiKey);
+
+            var response = await _client.PostAsync(_cloudImageLink + "/Api/delete", form);
+        </code>
+    </pre>
+    </p-panel>
+
+    <p-panel
+      class="mt-15 mb-15 p"
+      header="Js Example"
+      [toggleable]="true"
+      [collapsed]="true"
+    >
+      <pre class="code-example">
+        <code>
+          &lt;script&gt;
+          async function deleteImages() &#123;
+              const apiKey = 'your-api-key';
+              const baseUrl = 'http://localhost:5246'; // Replace with your actual base URL
+              const urlList = document.getElementById('urlList').value.split('\n').filter(url => url.trim() !== '');
+
+              try &#123;
+                  const response = await fetch(`$&#123;baseUrl&#125;/Api/delete`, &#123;
+                      method: 'POST',
+                      headers: &#123;
+                          'Content-Type': 'application/json',
+                          'ApiKey': apiKey
+                          &#125;,
+                      body: JSON.stringify(urlList),
+                      credentials: 'include'
+                      &#125;);
+
+                  if (response.ok) &#123;
+                      const result = await response.json();
+                      console.log('Delete successful:', result);
+                    &#125; else &#123;
+                      console.error('Delete failed:', response.status, response.statusText);
+                    &#125;
+                      &#125; catch (error) &#123;
+                  console.error('Error deleting images:', error);
+                &#125;
+              &#125;
+      &lt;/script&gt;
+        </code>
+    </pre>
+    </p-panel>
   </div>
 </div>

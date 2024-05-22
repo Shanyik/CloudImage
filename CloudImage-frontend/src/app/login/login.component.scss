@@ -16,14 +16,13 @@
 }
 
 .login-container {
-  background-color: #ffffff; /* White background */
-  border-radius: 15px; /* Rounded edges */
-  padding: 20px; /* Add padding */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7); /* Add a subtle shadow */
-  min-width: 350px; /* Limit width */
+  background-color: #ffffff;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+  min-width: 350px;
   min-height: 350px;
 
-  /* Center the container horizontally and vertically */
   position: absolute;
   top: 50%;
   left: 50%;

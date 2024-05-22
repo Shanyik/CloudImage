@@ -3,11 +3,12 @@ import { ApiService } from '../services/api.service';
 import { CommonModule } from '@angular/common';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { FileUploadModule } from 'primeng/fileupload';
+import { PanelModule } from 'primeng/panel';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, ProgressBarModule, FileUploadModule],
+  imports: [CommonModule, ProgressBarModule, FileUploadModule, PanelModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
@@ -23,8 +24,7 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.apiService.getApiKeyInfo().subscribe(
       (response: any) => {
-        this.link = location.origin.replace('4200', '5246/Api/Image');
-        console.log(location.origin);
+        this.link = location.origin.replace('4200', '5246/Api');
         this.apiKey = response.key;
         this.usedStorage =
           Math.round(response.usedStorageGB * 1024 * 100) / 100;
